@@ -1,0 +1,34 @@
+---
+- name: Clone Spectre Web GitLab Repo and Run index.html
+  hosts: spectre_web
+  become: yes
+
+  tasks:
+    - name: Update the system packages
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Ubuntu'
+
+    - name: Install Git
+      package:
+        name: git
+        state: present
+      when: ansible_os_family == 'Ubuntu'
+
+    - name: Clone Spectre Web GitLab Repo
+      git:
+        repo: https://gitlab.com/spectre.app/web.git
+        dest: /path/to/destination_directory
+      register: git_result
+
+    - name: Copy index.html to web server directory
+      command: cp /path/to/destination_directory/index.html /var/www/html/index.html  
+      when: git_result.changed
+
+    - name: Start a simple web server (Python 3)
+      command: python3 -m http.server 80
+      args:
+        chdir: /var/www/html
+      async: 1000
+      poll: 0
+

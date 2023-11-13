@@ -1,0 +1,10 @@
+---
+# Specify Ansible Galaxy roles and collections
+roles:
+  - name: hammad.spectre_web
+    src: hammad.spectre_web
+  - name: ibrahim.spectre_android
+    src: ibrahim.spectre_android
+  - name: saim.spectre_api
+    src: saim.spectre_api
+

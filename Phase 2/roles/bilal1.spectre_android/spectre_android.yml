@@ -1,0 +1,50 @@
+---
+- name: Install Spectre Android on Ubuntu
+  hosts: spectre_android
+  become: yes
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - python3-pip
+        - git
+        - python3-venv
+
+    - name: Clone the Spectre Android repository
+      git:
+        repo: https://github.com/aschw/spectre.git
+        dest: /opt/spectre
+        update: yes
+      notify: Create Python virtual environment
+
+    - name: Create Python virtual environment
+      command: python3 -m venv /opt/spectre/venv
+      when: not ansible_check_mode
+      notify: Install Spectre Android dependencies
+
+    - name: Install Spectre Android dependencies
+      pip:
+        requirements: /opt/spectre/requirements.txt
+        virtualenv: /opt/spectre/venv
+      when: not ansible_check_mode
+
+    - name: Start Spectre Android
+      command: /opt/spectre/venv/bin/spectre
+      async: 600
+      poll: 0
+      ignore_errors: yes
+      notify: Check Spectre Android status
+
+    - name: Check Spectre Android status
+      command: ps aux | grep spectre | grep -v grep
+      register: spectre_process
+      until: spectre_process.stdout | search('spectre')
+      retries: 10
+      delay: 5
+

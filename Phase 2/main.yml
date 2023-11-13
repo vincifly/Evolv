@@ -1,0 +1,13 @@
+---
+- hosts: web
+  roles:
+    - role: bilal.spectre_web
+
+- hosts: android
+  roles:
+    - role: bilal1.spectre_android
+
+- hosts: api
+  roles:
+    - role: esha.spectre_api
+
